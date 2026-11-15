@@ -160,4 +160,4 @@ python train.py   # Training and evaluation
 
 ## Author
 
-**Mrunal**: B.E. Computer Engineering (AI/ML), University of Mumbai
+**Mrunal Patil**: B.E. Computer Engineering (AI/ML), University of Mumbai
