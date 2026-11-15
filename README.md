@@ -2,7 +2,7 @@
 
 A text classification project that predicts whether a Yelp review is **1-star** or **5-star** from the review text alone, using classic NLP techniques and scikit-learn.
 
-The project also compares two ways of turning text into features, **Bag-of-Words (CountVectorizer)** and **TF-IDF**, and explains why the simpler one won with Naive Bayes.
+The project also compares two ways of turning text into features, **Bag-of-Words (CountVectorizer)** and **TF-IDF**, and shows why adding TF-IDF in a scikit-learn pipeline actually broke the Naive Bayes model.
 
 ---
 
@@ -38,13 +38,13 @@ Yelp_Review_Classifier/
 
 ### 2. Preprocessing
 - Kept only 1-star and 5-star reviews
-- Removed English stopwords using NLTK
 - Converted text into numeric features with:
   - **CountVectorizer** (raw word counts)
   - **TF-IDF** (term frequency × inverse document frequency)
 
 ### 3. Modeling
-- **Multinomial Naive Bayes** trained on each feature type
+- **Baseline:** CountVectorizer + Multinomial Naive Bayes
+- **Pipeline:** scikit-learn `Pipeline` combining CountVectorizer → TF-IDF → Multinomial Naive Bayes
 - 70 / 30 train-test split (`random_state=101`)
 - Evaluated with a confusion matrix and classification report (precision, recall, F1)
 
@@ -52,17 +52,27 @@ Yelp_Review_Classifier/
 
 ## Results
 
-| Features         | Model          | Accuracy | 1-star F1 | 5-star F1 |
-|------------------|----------------|----------|-----------|-----------|
-| CountVectorizer  | Multinomial NB | _xx%_    | _x.xx_    | _x.xx_    |
-| TF-IDF           | Multinomial NB | _xx%_    | _x.xx_    | _x.xx_    |
+| Model                                   | Accuracy | 1-star F1 | 5-star F1 |
+|-----------------------------------------|----------|-----------|-----------|
+| Baseline: CountVectorizer + NB          | **93%**  | **0.78**  | **0.96**  |
+| Pipeline: CountVectorizer + TF-IDF + NB | 81%      | 0.00      | 0.90      |
 
-**Key finding:** adding TF-IDF made the Naive Bayes model *worse*.
+```
+Confusion matrix: Baseline (CountVectorizer + NB)
+[[159  69]     <- 159 of 228 one-star reviews correctly identified
+ [ 22 976]]    <- 976 of 998 five-star reviews correctly identified
+
+Confusion matrix: Pipeline (CountVectorizer + TF-IDF + NB)
+[[  0 228]     <- every one-star review predicted as 5-star
+ [  0 998]]    <- every five-star review predicted as 5-star
+```
+
+**Key finding:** adding TF-IDF made the model *worse*. The TF-IDF pipeline predicted **5 stars for every single review**. Its 81% accuracy is simply the share of 5-star reviews in the test set (998 / 1226), so it learned nothing useful.
 
 ### Why TF-IDF hurt performance
 - **Multinomial NB expects count data.** It models how often each word appears. TF-IDF replaces counts with small fractional weights that no longer fit that assumption.
-- **The classes are imbalanced.** There are many more 5-star than 1-star reviews. With TF-IDF features, the model leaned heavily toward predicting 5 stars, so recall on the 1-star class collapsed.
-- **Accuracy alone hides this.** The per-class F1 scores and the confusion matrix make the drop clear.
+- **The classes are imbalanced.** There are about 4× more 5-star than 1-star reviews. With TF-IDF's small, flattened feature values, the class prior dominated and the model always predicted the majority class.
+- **Accuracy alone hides this.** 81% looks acceptable, but the 1-star F1 of 0.00 and the confusion matrix show the model is useless for detecting negative reviews.
 
 ---
 
@@ -84,8 +94,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-`main.py` is the single entry point. It imports `data.py` (preprocessing) and then `train.py` (training and evaluation), so the whole project runs with one command. NLTK stopwords are downloaded automatically on the first run.
-
+`main.py` is the single entry point. It imports `data.py` (preprocessing) and then `train.py` (training and evaluation), so the whole project runs with one command.
 You can also run each stage on its own:
 ```bash
 python data.py    # EDA and preprocessing only
@@ -99,15 +108,16 @@ python train.py   # Training and evaluation
 - **Python**
 - **pandas, NumPy**: data handling
 - **Matplotlib, Seaborn**: visualization
-- **scikit-learn**: vectorization, Naive Bayes, evaluation
-- **NLTK**: stopword removal
+- **scikit-learn**: vectorization, TF-IDF, Pipeline, Naive Bayes, evaluation
 
 ---
 
 ## Future Improvements
 
 - Pair TF-IDF with **Logistic Regression** or **LinearSVC**, models that suit TF-IDF better than NB
+- Improve 1-star recall (currently 0.70)
 - Handle class imbalance with `class_weight='balanced'` or resampling
+- Remove English **stopwords** (NLTK) and compare results
 - Add **bigrams** (`ngram_range=(1, 2)`) to capture phrases like "not good"
 - Extend to all 5 star ratings (multi-class) or 3-class sentiment
 - Try transformer models (e.g. DistilBERT) for comparison
@@ -119,6 +129,7 @@ python train.py   # Training and evaluation
 
 - Debugging common pandas pitfalls (e.g. `groupby().mean()` on text columns in pandas 2.x, `df('col')` vs `df['col']`)
 - Structuring an ML project as separate Python modules with a single `main.py` entry point
+- Building a scikit-learn `Pipeline` that chains vectorization, TF-IDF and the classifier into one model
 - That a more sophisticated feature (TF-IDF) is not automatically better, because the model and the feature representation have to fit each other
 - Why per-class metrics matter more than accuracy on imbalanced data
 
