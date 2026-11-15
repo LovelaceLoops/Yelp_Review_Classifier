@@ -15,6 +15,7 @@ Yelp_Review_Classifier/
 ├── train.py             # Model training and evaluation
 ├── main.py              # Entry point: runs the full pipeline
 ├── requirements.txt     # Python dependencies
+├── images/              # Saved EDA plots used in this README
 └── README.md
 ```
 
@@ -35,6 +36,28 @@ Yelp_Review_Classifier/
 - Plotted the text length distribution across star ratings
 - Grouped by `stars` and computed mean `cool`, `useful`, `funny` and `text length`
 - Built a correlation matrix of these features
+
+#### EDA Visualizations
+
+**Number of reviews per star rating**
+
+![Count of reviews per star rating](images/star_count.png)
+
+Most reviews are 4 or 5 stars. After filtering to 1 and 5 stars, 5-star reviews outnumber 1-star reviews about 4 to 1, a class imbalance that matters later in modeling.
+
+**Text length distribution by star rating**
+
+![Text length histograms by star rating](images/text_length_by_stars.png)
+
+![Text length boxplot by star rating](images/text_length_boxplot.png)
+
+Review length is similar across ratings, with 5-star reviews slightly shorter on average. Text length alone is not a strong predictor of rating.
+
+**Correlation between review features (averaged per star rating)**
+
+![Correlation heatmap](images/correlation_heatmap.png)
+
+`funny` and `useful` votes are strongly positively correlated with each other and with text length, while `cool` votes move in the opposite direction.
 
 ### 2. Preprocessing
 - Kept only 1-star and 5-star reviews
@@ -137,4 +160,4 @@ python train.py   # Training and evaluation
 
 ## Author
 
-**Mrunal Patil**: B.E. Computer Engineering (AI/ML), University of Mumbai
+**Mrunal**: B.E. Computer Engineering (AI/ML), University of Mumbai
