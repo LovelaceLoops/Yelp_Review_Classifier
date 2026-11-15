@@ -34,3 +34,11 @@ y = yelp_class['stars']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=101)
 
 pipe.fit(X_train,y_train)
+
+#New Predictions and Evaluations
+predictions = pipe.predict(X_test)
+
+#New Confusion matrix and Classification report
+print(confusion_matrix(y_test,predictions))
+print("/n")
+print(classification_report(y_test,predictions))
