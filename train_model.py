@@ -7,9 +7,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import Pipeline
 
-import nltk
-nltk.download('stopwords')
-
 from sklearn.naive_bayes import MultinomialNB
 nb = MultinomialNB()
 
@@ -19,8 +16,9 @@ nb.fit(X_train,y_train)
 predictions = nb.predict(X_test)
 
 #Confusion matrix and Classification report
+print("======== Evaluation of original data ========")
 print(confusion_matrix(y_test,predictions))
-print("/n")
+print("\n")
 print(classification_report(y_test,predictions))
 
 #Create Pipeline
@@ -39,6 +37,7 @@ pipe.fit(X_train,y_train)
 predictions = pipe.predict(X_test)
 
 #New Confusion matrix and Classification report
+print("======== Evaluation using **CountVectorizer,TfidfTransformer,MultinomialNB** ========")
 print(confusion_matrix(y_test,predictions))
-print("/n")
+print("\n")
 print(classification_report(y_test,predictions))
