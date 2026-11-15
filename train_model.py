@@ -1,6 +1,7 @@
-from data import X_train,X_test,y_train,y_test,X,y
+from data import X_train,X_test,y_train,y_test,X,y,yelp_class
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix,classification_report
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -26,3 +27,10 @@ print(classification_report(y_test,predictions))
 pipe = Pipeline([('bow',CountVectorizer()),
                  ('tfidf',TfidfTransformer()),
                  ('model',MultinomialNB())])
+
+#Redo train_test_split
+X = yelp_class['text']
+y = yelp_class['stars']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=101)
+
+pipe.fit(X_train,y_train)
